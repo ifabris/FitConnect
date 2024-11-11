@@ -1,7 +1,7 @@
 package hr.algebra.FitConnect.feature.workout;
 
 import hr.algebra.FitConnect.feature.exercise.DTO.WorkoutDTO;
-import hr.algebra.FitConnect.feature.exercise.request.WorkoutRequest;
+import hr.algebra.FitConnect.feature.workout.request.WorkoutRequestDTO;
 import hr.algebra.FitConnect.feature.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -22,19 +22,17 @@ public class WorkoutController {
     private WorkoutService workoutService;
 
     @PostMapping
-    public ResponseEntity<WorkoutDTO> createWorkout(@RequestBody WorkoutRequest workoutRequest, Authentication authentication) {
+    public ResponseEntity<WorkoutDTO> createWorkout(@RequestBody WorkoutRequestDTO workoutRequestDTO, Authentication authentication) {
         User currentCoach = (User) authentication.getPrincipal();
 
+        // Ensure only coaches can create workouts
         if (currentCoach.getRole().getRoleId() != 2) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only coaches can make workouts.");
         }
 
-        Workout workout = new Workout();
-        workout.setWorkoutName(workoutRequest.getWorkoutName());
-        workout.setDescription(workoutRequest.getDescription());
-        workout.setCoach(currentCoach); // Set the current coach
+        // Pass the current coach and the DTO to the service
+        WorkoutDTO newWorkout = workoutService.createWorkout(workoutRequestDTO, currentCoach);
 
-        WorkoutDTO newWorkout = workoutService.createWorkout(workout);
         return ResponseEntity.status(HttpStatus.CREATED).body(newWorkout);
     }
 
@@ -42,11 +40,7 @@ public class WorkoutController {
     public ResponseEntity<List<Workout>> getWorkoutsByDate(
             @PathVariable int userId,
             @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
-        // Fetch workouts based on the userId and the new workout_date
         List<Workout> workouts = workoutService.getWorkoutsByUserAndDate(userId, date);
         return ResponseEntity.ok(workouts);
     }
-
 }
-
-

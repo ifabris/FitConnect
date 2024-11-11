@@ -4,7 +4,9 @@ import hr.algebra.FitConnect.feature.exercise.DTO.ExerciseDTO;
 import hr.algebra.FitConnect.feature.exercise.DTO.WorkoutDTO;
 import hr.algebra.FitConnect.feature.exercise.Exercise;
 import hr.algebra.FitConnect.feature.exercise.ExerciseRepo;
+import hr.algebra.FitConnect.feature.user.User;
 import hr.algebra.FitConnect.feature.userWorkout.UserWorkoutRepo;
+import hr.algebra.FitConnect.feature.workout.request.WorkoutRequestDTO;
 import hr.algebra.FitConnect.feature.workoutExercise.WorkoutExercise;
 import hr.algebra.FitConnect.feature.workoutExercise.WorkoutExerciseRepo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +16,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -32,10 +33,30 @@ public class WorkoutService {
     @Autowired
     private UserWorkoutRepo userWorkoutRepo;
 
-    public WorkoutDTO createWorkout(Workout workout) {
+    public WorkoutDTO createWorkout(WorkoutRequestDTO workoutRequestDTO, User currentCoach) {
+        // Create the workout
+        Workout workout = new Workout();
+        workout.setWorkoutName(workoutRequestDTO.getWorkoutName());
+        workout.setDescription(workoutRequestDTO.getDescription());
+        workout.setCreatedAt(LocalDateTime.now());
+        workout.setCoach(currentCoach); // assuming currentCoach is set somewhere else
+
+        // Save the workout
         Workout savedWorkout = workoutRepo.save(workout);
-        return mapToDTO(savedWorkout); // Convert to WorkoutDTO
+
+        // Add exercises to the workout
+        for (Integer exerciseId : workoutRequestDTO.getExerciseIds()) {
+            Exercise exercise = exerciseRepo.findById(exerciseId)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Exercise not found"));
+            WorkoutExercise workoutExercise = new WorkoutExercise();
+            workoutExercise.setWorkout(savedWorkout);
+            workoutExercise.setExercise(exercise);
+            workoutExerciseRepo.save(workoutExercise);
+        }
+
+        return mapToDTO(savedWorkout);  // Map to DTO and return
     }
+
 
     private WorkoutDTO mapToDTO(Workout workout) {
         WorkoutDTO dto = new WorkoutDTO();
@@ -62,8 +83,7 @@ public class WorkoutService {
         return dto;
     }
 
-
-        // Add exercise to a workout
+    // Add exercise to a workout
     public Exercise addExerciseToWorkout(int workoutId, Exercise exercise) {
         // Check if workout exists
         Workout workout = workoutRepo.findById(workoutId)
@@ -81,9 +101,14 @@ public class WorkoutService {
 
         return savedExercise; // Return the saved exercise
     }
+
     public List<Workout> getWorkoutsByUserAndDate(int userId, LocalDate workoutDate) {
         return userWorkoutRepo.findByUserIdAndWorkoutDate(userId, workoutDate);
     }
+
+    public Workout findById(int workoutId) {
+        return workoutRepo.findById(workoutId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Workout not found"));
+    }
+
 }
-
-

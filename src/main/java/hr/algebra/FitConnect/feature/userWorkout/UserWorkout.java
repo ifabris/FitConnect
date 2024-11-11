@@ -1,16 +1,18 @@
 package hr.algebra.FitConnect.feature.userWorkout;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import hr.algebra.FitConnect.feature.workout.Workout;
 import hr.algebra.FitConnect.feature.user.User;
 import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Entity
 @Data
 @Table(name = "user_workouts")
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "userWorkoutId")
 public class UserWorkout {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,7 +27,4 @@ public class UserWorkout {
     private User user;
 
     private LocalDate workoutDate;
-
-    // Getters and setters...
 }
-
