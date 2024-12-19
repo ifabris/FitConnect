@@ -23,7 +23,5 @@ public class Exercise {
     @ManyToMany(mappedBy = "exercises")
     @JsonBackReference
     private List<Workout> workouts = new ArrayList<>();
-
-    // Getters and setters
 }
 

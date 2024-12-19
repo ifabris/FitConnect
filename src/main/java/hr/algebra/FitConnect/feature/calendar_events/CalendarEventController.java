@@ -20,23 +20,27 @@ public class CalendarEventController {
     @Autowired
     private CalendarEventService calendarEventService;
 
-    // Endpoint for coaches to create events
     @PostMapping("/create")
     public ResponseEntity<CalendarEvent> createEvent(
             @RequestBody CalendarEventRequest request,
             Authentication authentication) {
-        // Fetch the coach from the authentication (assumes you have the UserDetails setup properly)
         User currentCoach = (User) authentication.getPrincipal();
 
-        // Ensure that the current user is a coach by checking the roleId
         if (currentCoach.getRole().getRoleId() != 2) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only coaches can create events.");
         }
 
-        // Create event by passing currentCoach's ID and the user ID from request
-        CalendarEvent newEvent = calendarEventService.createEvent(currentCoach.getUserId(), request.getUserId(), request);
+        CalendarEvent newEvent = calendarEventService.createEvent(currentCoach.getUserId(), request.getUsername(), request);
         return ResponseEntity.status(HttpStatus.CREATED).body(newEvent);
     }
+
+    @GetMapping("/{eventId}")
+    public ResponseEntity<CalendarEvent> getEventById(@PathVariable int eventId) {
+        CalendarEvent event = calendarEventService.getEventById(eventId);
+        return ResponseEntity.ok(event);
+    }
+
+
 
 
 

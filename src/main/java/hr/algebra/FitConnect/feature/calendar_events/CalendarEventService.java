@@ -19,10 +19,11 @@ public class CalendarEventService {
     @Autowired
     private UserRepo userRepo;
 
-    public CalendarEvent createEvent(int coachId, int userId, CalendarEventRequest request) {
+    public CalendarEvent createEvent(int coachId, String username, CalendarEventRequest request) {
         User coach = userRepo.findById(coachId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Coach not found"));
-        User user = userRepo.findById(userId)
+
+        User user = userRepo.findByUsername(request.getUsername())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
         CalendarEvent event = new CalendarEvent();
@@ -34,6 +35,12 @@ public class CalendarEventService {
 
         return calendarEventRepo.save(event);
     }
+
+    public CalendarEvent getEventById(int eventId) {
+        return calendarEventRepo.findById(eventId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Event not found"));
+    }
+
 
     public List<CalendarEvent> getEventsForCoach(int coachId) {
         User coach = userRepo.findById(coachId)

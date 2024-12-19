@@ -18,5 +18,14 @@ public class Role {
     @Enumerated(EnumType.STRING)
     private RoleType roleName;
 
+    // Add a constructor with all fields
+    public Role(int roleId, RoleType roleName) {
+        this.roleId = roleId;
+        this.roleName = roleName;
+    }
+
+    // Default constructor for JPA
+    public Role() {
+    }
 }
 

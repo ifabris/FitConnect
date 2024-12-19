@@ -30,4 +30,11 @@ public class UserStatController {
         UserStat stat = userStatService.addUserStat(userId, request.getWeight(), request.getHeight());
         return ResponseEntity.status(HttpStatus.CREATED).body(stat);
     }
+
+    @DeleteMapping("/{statId}")
+    public ResponseEntity<Void> deleteUserStat(@PathVariable int statId) {
+        userStatService.deleteStat(statId);
+        return ResponseEntity.noContent().build();
+    }
+
 }

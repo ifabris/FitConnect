@@ -39,5 +39,15 @@ public class UserStatServiceImpl implements UserStatService {
         return userStatRepository.save(userStat);
     }
 
+    @Override
+    public boolean deleteStat(int id) {
+        if (userStatRepository.existsById(id)) {
+            userStatRepository.deleteById(id);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
 
 }

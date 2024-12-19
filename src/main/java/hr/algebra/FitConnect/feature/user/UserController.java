@@ -3,9 +3,13 @@ package hr.algebra.FitConnect.feature.user;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/users")
@@ -20,10 +24,39 @@ public class UserController {
 
     // GET all users
     @GetMapping
-    public ResponseEntity<List<User>> getAllUsers() {
+    public ResponseEntity<List<User>> getAllUsers(Authentication authentication) {
+        User admin = (User) authentication.getPrincipal();
+
+        if (admin.getRole().getRoleId() != 1) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only admins can see user info.");
+        }
+
         List<User> users = userService.getAllUsers();
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
+
+    @GetMapping("/usernames")
+    public ResponseEntity<List<Map<String, Object>>> getAllUsernames(Authentication authentication) {
+        User currentUser = (User) authentication.getPrincipal();
+
+        List<User> users = userService.getAllUsers();
+
+        // Exclude the currently logged-in user from the result
+        List<Map<String, Object>> usernames = users.stream()
+                .filter(user -> !user.getUserId().equals(currentUser.getUserId()))
+                .map(user -> {
+                    Map<String, Object> userMap = new HashMap<>();
+                    userMap.put("userId", user.getUserId());
+                    userMap.put("username", user.getUsername());
+                    userMap.put("picture", user.getPicture());
+                    return userMap;
+                })
+                .toList();
+
+
+        return new ResponseEntity<>(usernames, HttpStatus.OK);
+    }
+
 
     // GET user by ID
     @GetMapping("/{id}")

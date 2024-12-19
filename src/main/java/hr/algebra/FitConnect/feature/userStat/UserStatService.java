@@ -12,4 +12,6 @@ public interface UserStatService {
 
     UserStat addUserStat(int userId, BigDecimal weight, BigDecimal height);
 
+    boolean deleteStat(int id);
+
 }

@@ -35,6 +35,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
         if (!isEndpointAllowingUnauthenticatedAccess(request)) {
             String jwtToken = extractJwtToken(request);
+
             log.trace("doFilter for endpoint: {} resolved jwt: {}", request.getRequestURI(), jwtToken);
 
             if (jwtToken != null

@@ -32,6 +32,21 @@ public class User {
     @Column(name="updatedAt")
     private LocalDateTime updatedAt; // Timestamp for last update
 
+    public User(Integer userId, String username, String password, String email, Role role, String picture, LocalDateTime createdAt, LocalDateTime updatedAt) {
+        this.userId = userId;
+        this.username = username;
+        this.password = password;
+        this.email = email;
+        this.role = role;
+        this.picture = picture;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
+
+    // Default constructor for JPA
+    public User() {
+    }
+
 }
 
 
